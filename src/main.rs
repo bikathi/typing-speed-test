@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 #[function_component]
 fn App() -> Html {
-    let counter = use_state(|| 0);
+    let counter = use_state(|| 0i32);
     let on_increase_click = {
         let counter = counter.clone();
         move |_| {
