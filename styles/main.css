@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@iconify/tailwind4";
 
 @theme {
     --color-base-100: oklch(20.84% 0.008 17.911);
@@ -37,5 +38,5 @@
 }
 
 @utility input-areas {
-    @apply text-xl p-3 size-full absolute outline-none;
+    @apply p-3 size-full absolute outline-none;
 }
