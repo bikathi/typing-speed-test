@@ -1,4 +1,5 @@
 use crate::settings::AppSettings;
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 mod settings;
@@ -6,6 +7,8 @@ mod settings;
 #[function_component]
 fn App() -> Html {
     let app_settings = use_state(move || AppSettings::default());
+    let source_text = use_state(move || String::from("this is a sample statement"));
+    let user_input = use_state(move || String::new());
 
     let increase_font_size = {
         if app_settings.font_size < 50 {
@@ -31,6 +34,14 @@ fn App() -> Html {
         } else {
             Callback::default()
         }
+    };
+
+    let on_input = {
+        let current_user_input = user_input.clone();
+        Callback::from(move |e: InputEvent| {
+            let input = e.target_unchecked_into::<HtmlInputElement>();
+            current_user_input.set(input.value());
+        })
     };
 
     html! {
@@ -96,7 +107,7 @@ fn App() -> Html {
 
                     // typing input
                     <form class={classes!(String::from("w-full h-96 mt-5 relative"))}>
-                        <p class={classes!(format!("text-base-content/50 z-10 input-areas {}", {
+                        <p class={classes!(format!("z-10 input-areas {}", {
                             match app_settings.font_size {
                                 10 => "text-xl",
                                 20 => "text-2xl",
@@ -106,9 +117,35 @@ fn App() -> Html {
                                 _ => ""
                             }
                         }))}>
-                            { "this is a sample statement" }
+                            {
+                                source_text.char_indices().map(|(index, c)| {
+                                    html! {
+                                        <span
+                                            key={ index }
+                                            class={
+                                                if !user_input.is_empty() {
+                                                    match user_input.chars().nth(index) {
+                                                        Some(user_char) => {
+                                                            if user_char == c {
+                                                                "text-slate-100"
+                                                            } else {
+                                                                "text-red-500"
+                                                            }
+                                                        },
+                                                        None => "text-base-content/50",
+                                                    }
+                                                } else {
+                                                    "text-base-content/50"
+                                                }
+                                            }
+                                        >
+                                            { format!("{c}") }
+                                        </span>
+                                    }
+                                }).collect::<Html>()
+                            }
                         </p>
-                        <textarea class={classes!(format!("text-base-content {} z-20 bg-transparent input-areas", {
+                        <textarea oninput={on_input} class={classes!(format!("text-base-content {} z-20 bg-transparent input-areas", {
                             match app_settings.font_size {
                                 10 => "text-xl",
                                 20 => "text-2xl",
