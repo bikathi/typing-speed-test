@@ -1,5 +1,4 @@
 use crate::settings::AppSettings;
-use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 mod settings;
@@ -8,7 +7,7 @@ mod settings;
 fn App() -> Html {
     let app_settings = use_state(move || AppSettings::default());
     let source_text = use_state(move || String::from("this is a sample statement"));
-    let user_input = use_state(move || String::new());
+    let user_input = use_state(move || Vec::new());
 
     let increase_font_size = {
         if app_settings.font_size < 50 {
@@ -36,11 +35,20 @@ fn App() -> Html {
         }
     };
 
-    let on_input = {
+    let on_key_board_input = {
         let current_user_input = user_input.clone();
-        Callback::from(move |e: InputEvent| {
-            let input = e.target_unchecked_into::<HtmlInputElement>();
-            current_user_input.set(input.value());
+        Callback::from(move |e: KeyboardEvent| {
+            let mut new_input = (*current_user_input).clone();
+
+            if !e.key().eq(&("Backspace".to_string())) {
+                new_input.push(e.key().chars().nth(0).unwrap());
+            } else {
+                if new_input.len() > 0 {
+                    new_input.remove(new_input.len() - 1);
+                }
+            }
+
+            current_user_input.set(new_input);
         })
     };
 
@@ -106,56 +114,53 @@ fn App() -> Html {
                     </div>
 
                     // typing input
-                    <form class={classes!(String::from("w-full h-96 mt-5 relative"))}>
-                        <p class={classes!(format!("z-10 input-areas {}", {
-                            match app_settings.font_size {
-                                10 => "text-xl",
-                                20 => "text-2xl",
-                                30 => "text-3xl",
-                                40 => "text-4xl",
-                                50 => "text-5xl",
-                                _ => ""
-                            }
-                        }))}>
-                            {
-                                source_text.char_indices().map(|(index, c)| {
-                                    html! {
-                                        <span
-                                            key={ index }
-                                            class={
-                                                if !user_input.is_empty() {
-                                                    match user_input.chars().nth(index) {
-                                                        Some(user_char) => {
-                                                            if user_char == c {
-                                                                "text-slate-100"
-                                                            } else {
-                                                                "text-red-500"
-                                                            }
-                                                        },
-                                                        None => "text-base-content/50",
-                                                    }
+                    <p tabindex=0 class={classes!(format!("z-10 w-full h-96 mt-5 input-areas {}", {
+                        match app_settings.font_size {
+                            10 => "text-xl",
+                            20 => "text-2xl",
+                            30 => "text-3xl",
+                            40 => "text-4xl",
+                            50 => "text-5xl",
+                            _ => ""
+                        }
+                    }))} onkeydown={on_key_board_input}>
+                        {
+                            source_text.char_indices().map(|(index, c)| {
+                                let class={
+                                    if !user_input.is_empty() {
+                                        match user_input.get(index) {
+                                            Some(user_input) => {
+                                                if user_input.to_owned() == c {
+                                                    "text-slate-100"
                                                 } else {
-                                                    "text-base-content/50"
+                                                    "underline underline-offset-2 text-red-500 decoration-red-500"
                                                 }
-                                            }
-                                        >
-                                            { format!("{c}") }
-                                        </span>
+                                            },
+                                            None => "text-base-content/50",
+                                        }
+                                    } else {
+                                        "text-base-content/50"
                                     }
-                                }).collect::<Html>()
-                            }
-                        </p>
-                        <textarea oninput={on_input} class={classes!(format!("text-base-content {} z-20 bg-transparent input-areas", {
-                            match app_settings.font_size {
-                                10 => "text-xl",
-                                20 => "text-2xl",
-                                30 => "text-3xl",
-                                40 => "text-4xl",
-                                50 => "text-5xl",
-                                _ => ""
-                            }
-                        }))} />
-                    </form>
+                                };
+
+                                let animated_cursor_pre = {
+                                    if (index == 0 && user_input.len() == 0) || (index == user_input.len()) {
+                                        "current"
+                                    } else {
+                                        ""
+                                    }
+                                };
+                                html! {
+                                    <span
+                                        key={ index }
+                                        class={format!("{} {} relative", class, animated_cursor_pre)}
+                                    >
+                                        { format!("{c}") }
+                                    </span>
+                                }
+                            }).collect::<Html>()
+                        }
+                    </p>
 
                     // reset button
                     <div class={classes!(String::from("mt-5 text-center h-fit"))}>
@@ -176,5 +181,8 @@ fn App() -> Html {
 }
 
 fn main() {
+    // init logger
+    wasm_logger::init(wasm_logger::Config::default());
+
     yew::Renderer::<App>::new().render();
 }

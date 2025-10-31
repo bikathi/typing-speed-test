@@ -38,5 +38,23 @@
 }
 
 @utility input-areas {
-    @apply p-3 size-full absolute outline-none;
+    @apply p-3 size-full outline-none;
+}
+
+.current::before {
+    content: "_";
+    display: inline;
+    animation: blink 1s step-end infinite;
+    position: absolute;
+    bottom: 0px;
+}
+
+@keyframes blink {
+    from,
+    to {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }
