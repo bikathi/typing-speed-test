@@ -10,7 +10,7 @@ fn App() -> Html {
     let user_input = use_state(move || Vec::new());
 
     let increase_font_size = {
-        if app_settings.font_size < 50 {
+        if app_settings.font_size < settings::MAX_FONT_SIZE {
             let app_settings = app_settings.clone();
             Callback::from(move |_e| {
                 let mut new_app_settings = (*app_settings).clone(); // get an instance we can modify
@@ -23,7 +23,7 @@ fn App() -> Html {
     };
 
     let decrease_font_size = {
-        if app_settings.font_size > 10 {
+        if app_settings.font_size > settings::MIN_FONT_SIZE {
             let app_settings = app_settings.clone();
             Callback::from(move |_e| {
                 let mut new_app_settings = (*app_settings).clone(); // get an instance we can modify
@@ -49,6 +49,16 @@ fn App() -> Html {
             }
 
             current_user_input.set(new_input);
+        })
+    };
+
+    let reset_state = {
+        let source_text = source_text.clone();
+        let user_input = user_input.clone();
+
+        Callback::from(move |_e| {
+            source_text.set(String::from("this is a sample statement"));
+            user_input.set(Vec::new());
         })
     };
 
@@ -164,7 +174,7 @@ fn App() -> Html {
 
                     // reset button
                     <div class={classes!(String::from("mt-5 text-center h-fit"))}>
-                        <button class={classes!(String::from("settings-button rounded-full"))} title="Reset">
+                        <button class={classes!(String::from("settings-button rounded-full"))} title="Reset" onclick={reset_state}>
                             <span class="icon-[mdi-light--refresh] text-3xl"></span>
                         </button>
                     </div>
