@@ -1,6 +1,5 @@
-use std::{cell::RefCell, sync::Arc};
-
-pub const MAX_FONT_SIZE: i32 = 64i32;
+pub(crate) const MAX_FONT_SIZE: i32 = 50i32;
+pub(crate) const MIN_FONT_SIZE: i32 = 10i32;
 
 #[derive(Debug, Clone)]
 pub(crate) enum Theme {
@@ -12,7 +11,7 @@ pub(crate) enum Theme {
 pub(crate) struct AppSettings {
     pub font_size: i32,
     pub theme: Theme,
-    pub timer_running: bool
+    pub timer_running: bool,
 }
 
 impl Default for AppSettings {
@@ -29,7 +28,7 @@ impl AppSettings {
     pub(crate) fn inc_font_size(&mut self) {
         self.font_size += 10;
     }
-    
+
     pub(crate) fn dec_font_size(&mut self) {
         self.font_size -= 10;
     }

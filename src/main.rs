@@ -1,7 +1,9 @@
 use crate::settings::AppSettings;
 use yew::prelude::*;
 
+mod file_input;
 mod settings;
+mod util;
 
 #[function_component]
 fn App() -> Html {
@@ -74,9 +76,7 @@ fn App() -> Html {
                         <span class={classes!(String::from("text-4xl text-base-content"))}>
                             {"05:00"}
                         </span>
-                        <button class={classes!(String::from("py-2 px-3 h-14 rounded-md font-semibold text-sm outline-none bg-secondary/80 hover:bg-secondary/100 transition-colors duration-200 ease-in-out text-base-content"))}>
-                            {"Custom Text File"}
-                        </button>
+                        <file_input::FileInput />
                     </form>
 
                     // settings
