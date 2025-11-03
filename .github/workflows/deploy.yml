@@ -15,7 +15,7 @@ jobs:
           toolchain: stable
       - name: Install Trunk
         run: cargo install trunk
-      - name: Build and Deplote
+      - name: Build Yew App
         run: trunk build --release --public-url /${{ github.event.repository.name }}/
       - name: Publish to Gh-Pages
         uses: peaceiris/actions-gh-pages@v3
