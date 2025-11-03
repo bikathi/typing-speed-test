@@ -1,12 +1,18 @@
 use crate::settings::AppSettings;
 use yew::prelude::*;
 
+#[derive(Properties, PartialEq)]
+pub struct FileInputProps {
+    pub on_file_contents_load: Callback<String>,
+}
+
 #[derive(Debug, Clone)]
 pub(crate) enum ComponentMsg {
     FontSizeIncreased,
     FontSizeDecreased,
     StateReset,
     IncomingUserInput(String),
+    UpdateSourceText(String),
 }
 
 #[derive(Debug, Clone)]
@@ -29,6 +35,10 @@ impl Component for App {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        let on_file_contents_load: Callback<String> = ctx
+            .link()
+            .callback(|file_contents: String| ComponentMsg::UpdateSourceText(file_contents));
+
         html! {
             <main class={classes!(String::from("flex justify-center h-screen bg-base-100"))}>
                 <div class={classes!(String::from("flex flex-col justify-between h-full w-full md:w-1/2"))}>
@@ -41,6 +51,8 @@ impl Component for App {
                             <span class={classes!(String::from("text-4xl text-base-content"))}>
                                 {"05:00"}
                             </span>
+
+                            <crate::file_input::FileInput { on_file_contents_load } />
                         </form>
 
                         // settings
@@ -52,19 +64,6 @@ impl Component for App {
                                     <p class={classes!(String::from("h-14 w-20 inline-flex items-center justify-center text-xl bg-red-500"))}>{ self.app_settings.font_size }</p>
                                     <button class={classes!(String::from("settings-button"))} onclick={ctx.link().callback(|_| ComponentMsg::FontSizeIncreased)}>{"+"}</button>
                                     <button class={classes!(String::from("settings-button"))} onclick={ctx.link().callback(|_| ComponentMsg::FontSizeDecreased)}>{"-"}</button>
-                                </div>
-                            </div>
-
-                            // theme
-                            <div class={classes!(String::from("w-fit"))}>
-                                <h1 class={classes!(String::from("text-sm mb-1 text-base-content font-semibold"))}>{"Theme"}</h1>
-                                <div class={classes!(String::from("divide-x-1 rounded-lg overflow-clip"))}>
-                                    <button class={classes!(String::from("settings-button"))}>
-                                        <span class="icon-[mdi-light--lightbulb] text-3xl"></span>
-                                    </button>
-                                    <button class={classes!(String::from("settings-button"))}>
-                                        <span class="icon-[mdi-light--lightbulb-on] text-3xl"></span>
-                                    </button>
                                 </div>
                             </div>
 
@@ -178,13 +177,21 @@ impl Component for App {
                 true
             }
             ComponentMsg::IncomingUserInput(key) => {
-                if !key.eq(&("Backspace".to_string())) {
-                    self.user_input.push(key.chars().nth(0).unwrap());
-                } else {
+                if key.eq(&("Shift".to_string())) {
+                    return false;
+                } else if key.eq(&("Backspace".to_string())) {
                     if self.user_input.len() > 0 {
                         self.user_input.remove(self.user_input.len() - 1);
                     }
+                } else if !key.eq(&("Backspace".to_string())) {
+                    self.user_input.push(key.chars().nth(0).unwrap());
                 }
+
+                true
+            }
+            ComponentMsg::UpdateSourceText(new_text) => {
+                log::info!("{}", new_text);
+                self.source_text = new_text;
                 true
             }
         }

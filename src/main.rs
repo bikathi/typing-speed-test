@@ -1,4 +1,5 @@
 mod app;
+mod file_input;
 mod settings;
 
 fn main() {
