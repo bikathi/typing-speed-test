@@ -1,6 +1,6 @@
 mod app;
 mod file_input;
-mod settings;
+mod utils;
 
 fn main() {
     // init logger

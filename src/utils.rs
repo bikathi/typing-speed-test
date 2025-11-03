@@ -12,13 +12,13 @@ pub(crate) enum Theme {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct AppSettings {
+pub(crate) struct AppUtils {
     pub font_size: i32,
     pub theme: Theme,
     pub timer_running: bool,
 }
 
-impl Default for AppSettings {
+impl Default for AppUtils {
     fn default() -> Self {
         Self {
             font_size: 30,
@@ -28,7 +28,7 @@ impl Default for AppSettings {
     }
 }
 
-impl AppSettings {
+impl AppUtils {
     pub(crate) fn inc_font_size(&mut self) {
         self.font_size += 10;
     }
