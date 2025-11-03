@@ -56,7 +56,7 @@ impl Component for FileInput {
                 for={"dropzone-file"}
                 class="flex flex-col items-center justify-center h-20 w-64 border-2 border-accent hover:border-accent/80 hover:bg-accent-content/80 border-dashed rounded-lg cursor-pointer bg-accent-content">
                 <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                    <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">{"Click to upload"}</span></p>
+                    <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">{"Upload Custom Text"}</span></p>
                     <p class="text-xs text-gray-500">{"Only .txt files supported"}</p>
                 </div>
                 <input id="dropzone-file" type="file" class="hidden" {onchange} accept=".txt" />

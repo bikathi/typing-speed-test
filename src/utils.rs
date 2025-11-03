@@ -1,29 +1,38 @@
+use gloo::timers::callback::Interval;
+
 pub(crate) const MAX_FONT_SIZE: i32 = 50i32;
 pub(crate) const MIN_FONT_SIZE: i32 = 10i32;
 pub(crate) const DEFAULT_TEXT: &str = "Hi dear user!
 Welcome to this simple and free typing speed test tool.
-Click on this paragraph to start typing. When you type something wrong, it lights up red else it lights up white.
-You can upload your own text by clicking the input box above the timer pause/play button. Safe typing!";
+Click on this paragraph to start typing, the timer will start by itself. When you type something wrong, it lights up red, else it lights up white.
+Click on the '+/-' buttons to increase available minutes or if you feel \"pressured\", you can pause the timer.
+Reset progress by clicking the button below this paragraph.
+You can upload your own text by clicking the input box above the timer pause/play button. Happy typing:)";
+pub(crate) const INITIAL_TIME_MINUTES: u32 = 5_u32;
+pub(crate) const ADJUSTMENT_TIME_MINUTES: i32 = 1_i32;
 
-#[derive(Debug, Clone)]
-pub(crate) enum Theme {
-    Light,
-    Dark,
-}
-
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub(crate) struct AppUtils {
     pub font_size: i32,
-    pub theme: Theme,
+
+    // for the timer
+    /// Total time remaining in seconds (u because seconds can never be -ve)
+    pub duration_seconds: u32,
+
+    /// Tracks whether timer is running or paused
     pub timer_running: bool,
+
+    /// Handle for the interval timer. Kept in state to be dropped when pausing/unmounting.
+    pub interval_handle: Option<Interval>,
 }
 
 impl Default for AppUtils {
     fn default() -> Self {
         Self {
             font_size: 30,
-            theme: Theme::Dark,
+            duration_seconds: INITIAL_TIME_MINUTES * 60,
             timer_running: false,
+            interval_handle: None,
         }
     }
 }
@@ -37,11 +46,12 @@ impl AppUtils {
         self.font_size -= 10;
     }
 
-    pub(crate) fn set_theme(&mut self, new_value: Theme) {
-        self.theme = new_value;
-    }
+    pub(crate) fn format_time(&self) -> (String, String) {
+        let total_seconds = self.duration_seconds;
+        let minutes = total_seconds / 60;
+        let seconds = total_seconds % 60;
 
-    pub(crate) async fn toggle_timer_running(&mut self) {
-        self.timer_running = !self.timer_running;
+        // Use pad_start for "05:08" formatting
+        (format!("{:02}", minutes), format!("{:02}", seconds))
     }
 }

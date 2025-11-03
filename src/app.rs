@@ -1,4 +1,5 @@
 use crate::utils::AppUtils;
+use gloo::timers::callback::Interval;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -15,26 +16,26 @@ pub(crate) enum ComponentMsg {
     UpdateSourceText(String),
     // for the timer
     TimerTick,
-    TimerTogglePause,
+    TimerToggle,
     TimerAdjustTime(i32),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub(crate) struct App {
     source_text: String,
     user_input: Vec<char>,
-    app_settings: AppUtils,
+    app_utils: AppUtils,
 }
 
 impl Component for App {
     type Message = ComponentMsg;
     type Properties = ();
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
         Self {
             source_text: String::from(crate::utils::DEFAULT_TEXT),
             user_input: Vec::new(),
-            app_settings: AppUtils::default(),
+            app_utils: AppUtils::default(),
         }
     }
 
@@ -42,6 +43,9 @@ impl Component for App {
         let on_file_contents_load: Callback<String> = ctx
             .link()
             .callback(|file_contents: String| ComponentMsg::UpdateSourceText(file_contents));
+
+        // timer formatting
+        let (minutes, seconds) = self.app_utils.format_time();
 
         html! {
             <main class={classes!(String::from("flex justify-center h-screen bg-base-100"))}>
@@ -53,7 +57,7 @@ impl Component for App {
                         // allow users to upload their own source file
                         <form class={classes!(String::from("flex items-center justify-between"))}>
                             <span class={classes!(String::from("text-4xl text-base-content"))}>
-                                {"05:00"}
+                                {format!("{}:{}", minutes, seconds)}
                             </span>
 
                             <crate::file_input::FileInput { on_file_contents_load } />
@@ -65,7 +69,7 @@ impl Component for App {
                             <div class={classes!(String::from("w-fit"))}>
                                 <h1 class={classes!(String::from("text-sm mb-1 text-base-content font-semibold"))}>{"Font Size"}</h1>
                                 <div class={classes!(String::from("divide-x-1 rounded-lg overflow-clip"))}>
-                                    <p class={classes!(String::from("h-14 w-20 inline-flex items-center justify-center text-xl border-secondary/80 border-dashed border-r-0 bg-accent-content text-base-content"))}>{ self.app_settings.font_size }</p>
+                                    <p class={classes!(String::from("h-14 w-20 inline-flex items-center justify-center text-xl border-secondary/80 border-dashed border-r-0 bg-accent-content text-base-content"))}>{ self.app_utils.font_size }</p>
                                     <button class={classes!(String::from("settings-button"))} onclick={ctx.link().callback(|_| ComponentMsg::FontSizeIncreased)}>{"+"}</button>
                                     <button class={classes!(String::from("settings-button"))} onclick={ctx.link().callback(|_| ComponentMsg::FontSizeDecreased)}>{"-"}</button>
                                 </div>
@@ -75,24 +79,37 @@ impl Component for App {
                             <div class={classes!(String::from("w-fit"))}>
                                 <h1 class={classes!(String::from("text-sm mb-1 text-base-content font-semibold"))}>{"Time"}</h1>
                                 <div class={classes!(String::from("divide-x-1 rounded-lg overflow-clip"))}>
-                                    <button class={classes!(String::from("settings-button"))}>{"+"}</button>
-                                    <button class={classes!(String::from("settings-button"))}>{"-"}</button>
+                                    <button
+                                        class={classes!(String::from("settings-button"))}
+                                        onclick={ctx.link().callback(|_| ComponentMsg::TimerAdjustTime(crate::utils::ADJUSTMENT_TIME_MINUTES))}>
+                                        {"+"}
+                                    </button>
+                                    <button
+                                        class={classes!(String::from("settings-button"))}
+                                        onclick={ctx.link().callback(|_| ComponentMsg::TimerAdjustTime(-crate::utils::ADJUSTMENT_TIME_MINUTES))}>
+                                        {"-"}
+                                    </button>
                                 </div>
                             </div>
 
                             // timer
                             <div class={classes!(String::from("w-fit"))}>
                                 <h1 class={classes!(String::from("text-sm mb-1 text-base-content font-semibold"))}>{"Timer"}</h1>
-                                <button class={classes!(String::from("settings-button rounded-full"))}>
-                                    <span class="icon-[mdi-light--play] text-3xl"></span>
-                                    // <span class="icon-[mdi-light--pause]"></span>
+                                <button
+                                    class={classes!(String::from("settings-button rounded-full"))}
+                                    onclick={ctx.link().callback(|_| ComponentMsg::TimerToggle)}>
+                                    if self.app_utils.timer_running {
+                                        <span class="icon-[mdi-light--pause] text-3xl"></span>
+                                    } else {
+                                        <span class="icon-[mdi-light--play] text-3xl"></span>
+                                    }
                                 </button>
                             </div>
                         </div>
 
                         // typing input
                         <p id="typing-container" tabindex="0" class={classes!(format!("z-10 w-full h-96 mt-5 input-areas {}", {
-                            match self.app_settings.font_size {
+                            match self.app_utils.font_size {
                                 10 => "text-xl",
                                 20 => "text-2xl",
                                 30 => "text-3xl",
@@ -171,19 +188,19 @@ impl Component for App {
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             ComponentMsg::FontSizeDecreased => {
-                if self.app_settings.font_size > crate::utils::MIN_FONT_SIZE {
-                    self.app_settings.dec_font_size();
+                if self.app_utils.font_size > crate::utils::MIN_FONT_SIZE {
+                    self.app_utils.dec_font_size();
                     return true;
                 }
 
                 false
             }
             ComponentMsg::FontSizeIncreased => {
-                if self.app_settings.font_size < crate::utils::MAX_FONT_SIZE {
-                    self.app_settings.inc_font_size();
+                if self.app_utils.font_size < crate::utils::MAX_FONT_SIZE {
+                    self.app_utils.inc_font_size();
                     return true;
                 }
 
@@ -192,7 +209,7 @@ impl Component for App {
             ComponentMsg::StateReset => {
                 self.source_text = String::from(crate::utils::DEFAULT_TEXT);
                 self.user_input = Vec::new();
-                self.app_settings.font_size = 30_i32;
+                self.app_utils.font_size = 30_i32;
                 true
             }
             ComponentMsg::IncomingUserInput(key) => {
@@ -203,7 +220,12 @@ impl Component for App {
                         self.user_input.remove(self.user_input.len() - 1);
                     }
                 } else if !key.eq(&("Backspace".to_string())) {
+                    let user_input_empty = self.user_input.is_empty();
                     self.user_input.push(key.chars().nth(0).unwrap());
+
+                    if user_input_empty {
+                        ctx.link().send_message(ComponentMsg::TimerToggle);
+                    }
                 }
 
                 true
@@ -212,7 +234,42 @@ impl Component for App {
                 self.source_text = new_text;
                 true
             }
-            _ => false,
+            ComponentMsg::TimerToggle => {
+                self.app_utils.timer_running = !self.app_utils.timer_running;
+
+                if self.app_utils.timer_running && self.app_utils.duration_seconds > 0 {
+                    let link = ctx.link().clone();
+                    // Create a new interval that fires Msg::Tick every 1000 milliseconds (1 second)
+                    let handle = Interval::new(1000, move || {
+                        link.send_message(crate::app::ComponentMsg::TimerTick);
+                    });
+                    self.app_utils.interval_handle = Some(handle);
+                } else {
+                    // Stop the interval by dropping the handle
+                    self.app_utils.interval_handle = None;
+                }
+                true
+            }
+            ComponentMsg::TimerTick => {
+                if self.app_utils.timer_running && self.app_utils.duration_seconds > 0 {
+                    self.app_utils.duration_seconds -= 1;
+                } else if self.app_utils.duration_seconds == 0 {
+                    // Stop the timer when it hits zero
+                    self.app_utils.timer_running = false;
+                    self.app_utils.interval_handle = None;
+                }
+
+                true
+            }
+            ComponentMsg::TimerAdjustTime(amount) => {
+                let change_in_seconds = (amount * 60) as i64;
+                let current_seconds = self.app_utils.duration_seconds as i64;
+                let new_seconds = current_seconds + change_in_seconds;
+
+                // Ensure time doesn't go below zero
+                self.app_utils.duration_seconds = new_seconds.max(0) as u32;
+                true
+            }
         }
     }
 }
