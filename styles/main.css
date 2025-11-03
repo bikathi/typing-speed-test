@@ -41,7 +41,7 @@
     @apply p-3 size-full outline-none;
 }
 
-.current::before {
+#typing-container:focus .current::before {
     content: "_";
     display: inline;
     animation: blink 1s step-end infinite;
