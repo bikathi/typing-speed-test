@@ -28,7 +28,7 @@ impl Component for App {
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
-            source_text: String::from("this is a sample statement"),
+            source_text: String::from(crate::settings::DEFAULT_TEXT),
             user_input: Vec::new(),
             app_settings: AppSettings::default(),
         }
@@ -61,7 +61,7 @@ impl Component for App {
                             <div class={classes!(String::from("w-fit"))}>
                                 <h1 class={classes!(String::from("text-sm mb-1 text-base-content font-semibold"))}>{"Font Size"}</h1>
                                 <div class={classes!(String::from("divide-x-1 rounded-lg overflow-clip"))}>
-                                    <p class={classes!(String::from("h-14 w-20 inline-flex items-center justify-center text-xl bg-red-500"))}>{ self.app_settings.font_size }</p>
+                                    <p class={classes!(String::from("h-14 w-20 inline-flex items-center justify-center text-xl border-secondary/80 border-dashed border-r-0 bg-accent-content text-base-content"))}>{ self.app_settings.font_size }</p>
                                     <button class={classes!(String::from("settings-button"))} onclick={ctx.link().callback(|_| ComponentMsg::FontSizeIncreased)}>{"+"}</button>
                                     <button class={classes!(String::from("settings-button"))} onclick={ctx.link().callback(|_| ComponentMsg::FontSizeDecreased)}>{"-"}</button>
                                 </div>
@@ -156,7 +156,7 @@ impl Component for App {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             ComponentMsg::FontSizeDecreased => {
-                if self.app_settings.font_size > 10 {
+                if self.app_settings.font_size > crate::settings::MIN_FONT_SIZE {
                     self.app_settings.dec_font_size();
                     return true;
                 }
@@ -164,7 +164,7 @@ impl Component for App {
                 false
             }
             ComponentMsg::FontSizeIncreased => {
-                if self.app_settings.font_size < 50 {
+                if self.app_settings.font_size < crate::settings::MAX_FONT_SIZE {
                     self.app_settings.inc_font_size();
                     return true;
                 }
@@ -172,8 +172,9 @@ impl Component for App {
                 false
             }
             ComponentMsg::StateReset => {
-                self.source_text = String::from("this is a sample statement");
+                self.source_text = String::from(crate::settings::DEFAULT_TEXT);
                 self.user_input = Vec::new();
+                self.app_settings.font_size = 30_i32;
                 true
             }
             ComponentMsg::IncomingUserInput(key) => {
@@ -190,7 +191,6 @@ impl Component for App {
                 true
             }
             ComponentMsg::UpdateSourceText(new_text) => {
-                log::info!("{}", new_text);
                 self.source_text = new_text;
                 true
             }

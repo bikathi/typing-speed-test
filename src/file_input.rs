@@ -40,7 +40,7 @@ impl Component for FileInput {
                 }
                 false
             }
-            ComponentMsg::FileLoaded(filename, content) => {
+            ComponentMsg::FileLoaded(_filename, content) => {
                 // log::info!("File: {}\nContent:\n{}", filename, content);
                 ctx.props().on_file_contents_load.emit(content);
                 false

@@ -1,5 +1,9 @@
 pub(crate) const MAX_FONT_SIZE: i32 = 50i32;
 pub(crate) const MIN_FONT_SIZE: i32 = 10i32;
+pub(crate) const DEFAULT_TEXT: &str = "Hi dear user!
+Welcome to this simple and free typing speed test tool.
+Click on me to start typing. When you type something wrong, it lights up red else it lights up white.
+You can upload your own text by clicking the input box above the timer pause/play button. Safe typing!";
 
 #[derive(Debug, Clone)]
 pub(crate) enum Theme {

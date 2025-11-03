@@ -448,6 +448,10 @@
     border-style: var(--tw-border-style);
     border-width: 2px;
   }
+  .border-r-0 {
+    border-right-style: var(--tw-border-style);
+    border-right-width: 0px;
+  }
   .border-dashed {
     --tw-border-style: dashed;
     border-style: dashed;
@@ -460,6 +464,15 @@
   }
   .border-gray-300 {
     border-color: var(--color-gray-300);
+  }
+  .border-secondary {
+    border-color: var(--color-secondary);
+  }
+  .border-secondary\/80 {
+    border-color: color-mix(in srgb, oklch(69.776% 0.135 168.327) 80%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-secondary) 80%, transparent);
+    }
   }
   .bg-accent {
     background-color: var(--color-accent);
