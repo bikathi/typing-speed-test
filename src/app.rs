@@ -51,8 +51,8 @@ impl Component for App {
         let (minutes, seconds) = self.app_utils.format_time();
 
         html! {
-            <main class={classes!(String::from("flex justify-center h-screen bg-base-100"))}>
-                <div class={classes!(String::from("flex flex-col justify-between h-full w-full md:w-1/2"))}>
+            <main class={classes!(String::from("flex justify-center min-h-screen h-screen bg-base-100 w-full"))}>
+                <div class={classes!(String::from("flex flex-col justify-between h-full w-full md:w-[60%]"))}>
                     <div>/**/</div>
 
 
@@ -111,7 +111,7 @@ impl Component for App {
                         </div>
 
                         // typing input
-                        <p id="typing-container" tabindex="0" class={classes!(format!("z-10 w-full h-96 mt-5 input-areas {}", {
+                        <p id="typing-container" tabindex="0" class={classes!(format!("w-full h-96 mt-5 input-areas {}", {
                             match self.app_utils.font_size {
                                 10 => "text-xl",
                                 20 => "text-2xl",
@@ -120,10 +120,10 @@ impl Component for App {
                                 50 => "text-5xl",
                                 _ => ""
                             }
-                        }))} onkeydown={ctx.link().callback(|e: KeyboardEvent| { 
+                        }))} onkeydown={ctx.link().callback(|e: KeyboardEvent| {
                             // prevent browser's back navigation when Backspace is pressed on tabindex=0 elements
                             e.prevent_default();
-                            ComponentMsg::IncomingUserInput(e.key()) 
+                            ComponentMsg::IncomingUserInput(e.key())
                         })}>
                             {
                                 self.source_text.char_indices().map(|(index, c)| {
@@ -235,7 +235,7 @@ impl Component for App {
                 true
             }
             ComponentMsg::IncomingUserInput(key) => {
-                if key.eq(&("Shift".to_string())) {
+                if crate::utils::SPECIAL_KEYS.contains(&key.as_str()) {
                     return false;
                 } else if key.eq(&("Backspace".to_string())) {
                     if self.user_input.len() > 0 {
