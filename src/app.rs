@@ -188,9 +188,9 @@ impl Component for App {
                                 <span class="text-gray-500">
                                     {
                                         if let Some(file_name) = self.reading_from_file_name.as_ref() {
-                                            format!("Reading from file {}. New line characters (\\n) have been replaced with a space.", file_name)
+                                            format!("Reading from file {}. New line characters (\\n) and tabs (\\t) have been replaced with a space.", file_name)
                                         } else {
-                                            String::from("New line characters (\\n) have been replaced with a space.")
+                                            String::from("New line characters (\\n) and tabs (\\t) have been replaced with a space.")
                                         }
                                     }
                                 </span>
@@ -267,6 +267,11 @@ impl Component for App {
                     if user_input_empty {
                         ctx.link().send_message(ComponentMsg::TimerToggle);
                     }
+                }
+
+                // when the user types the last character
+                if self.user_input.len() == self.source_text.chars().count() {
+                    ctx.link().send_message(ComponentMsg::ResultsModalToggled)
                 }
 
                 true

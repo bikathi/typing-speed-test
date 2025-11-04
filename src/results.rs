@@ -28,6 +28,9 @@ impl Component for TestResults {
                             <span class={"icon-[mdi-light--plus] text-base-content text-4xl rotate-45"}></span>
                         </button>
                     </div>
+                    <div class="h-full flex items-center justify-center">
+                        <h3 class="italic font-semibold">{"For the reader: Implement your own way of showing results here!"}</h3>
+                    </div>
                 </div>
             </div>
         }
