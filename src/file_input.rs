@@ -40,9 +40,10 @@ impl Component for FileInput {
                 }
                 false
             }
-            ComponentMsg::FileLoaded(_filename, content) => {
-                // log::info!("File: {}\nContent:\n{}", filename, content);
-                ctx.props().on_file_contents_load.emit(content);
+            ComponentMsg::FileLoaded(filename, content) => {
+                // modify the content to replace all \n with a simple space
+                let modified_content = content.replace("\n", " ");
+                ctx.props().on_file_contents_load.emit((filename, modified_content));
                 false
             }
         }

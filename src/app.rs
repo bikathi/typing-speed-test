@@ -4,7 +4,7 @@ use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct FileInputProps {
-    pub on_file_contents_load: Callback<String>,
+    pub on_file_contents_load: Callback<(String, String)>,
 }
 
 #[derive(Debug, Clone)]
@@ -13,7 +13,7 @@ pub(crate) enum ComponentMsg {
     FontSizeDecreased,
     StateReset,
     IncomingUserInput(String),
-    UpdateSourceText(String),
+    UpdateSourceText(String, String),
     // for the timer
     TimerTick,
     TimerToggle,
@@ -25,24 +25,27 @@ pub(crate) struct App {
     source_text: String,
     user_input: Vec<char>,
     app_utils: AppUtils,
+    reading_from_file_name: Option<String>,
 }
 
 impl Component for App {
     type Message = ComponentMsg;
     type Properties = ();
 
-    fn create(ctx: &Context<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         Self {
             source_text: String::from(crate::utils::DEFAULT_TEXT),
             user_input: Vec::new(),
             app_utils: AppUtils::default(),
+            reading_from_file_name: None,
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let on_file_contents_load: Callback<String> = ctx
-            .link()
-            .callback(|file_contents: String| ComponentMsg::UpdateSourceText(file_contents));
+        let on_file_contents_load: Callback<(String, String)> =
+            ctx.link().callback(|(file_name, file_contents)| {
+                ComponentMsg::UpdateSourceText(file_name, file_contents)
+            });
 
         // timer formatting
         let (minutes, seconds) = self.app_utils.format_time();
@@ -156,6 +159,21 @@ impl Component for App {
                             }
                         </p>
 
+                        // extra instructions e.g file name
+                        <div >
+                            <h3 class="text-xs text-end italic">
+                                <span class="text-gray-500">
+                                    {
+                                        if let Some(file_name) = self.reading_from_file_name.as_ref() {
+                                            format!("Reading from file {}. New line characters (\\n) have been replaced with a space.", file_name)
+                                        } else {
+                                            String::from("New line characters (\\n) have been replaced with a space.")
+                                        }
+                                    }
+                                </span>
+                            </h3>
+                        </div>
+
                         // reset button
                         <div class={classes!(String::from("mt-5 text-center h-fit"))}>
                             <button class={classes!(String::from("settings-button rounded-full"))} title="Reset" onclick={ctx.link().callback(|_| ComponentMsg::StateReset)}>
@@ -230,8 +248,9 @@ impl Component for App {
 
                 true
             }
-            ComponentMsg::UpdateSourceText(new_text) => {
+            ComponentMsg::UpdateSourceText(file_name, new_text) => {
                 self.source_text = new_text;
+                self.reading_from_file_name = Some(file_name);
                 true
             }
             ComponentMsg::TimerToggle => {
