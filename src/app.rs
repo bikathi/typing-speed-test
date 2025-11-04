@@ -7,6 +7,11 @@ pub struct FileInputProps {
     pub on_file_contents_load: Callback<(String, String)>,
 }
 
+#[derive(Properties, PartialEq)]
+pub struct ResultsModalProps {
+    pub on_test_results_modal_closed: Callback<()>,
+}
+
 #[derive(Debug, Clone)]
 pub(crate) enum ComponentMsg {
     FontSizeIncreased,
@@ -18,6 +23,7 @@ pub(crate) enum ComponentMsg {
     TimerTick,
     TimerToggle,
     TimerAdjustTime(i32),
+    ResultsModalToggled,
 }
 
 #[derive(Debug)]
@@ -42,18 +48,31 @@ impl Component for App {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
+        // event fired by FileInput when file successfully finishes loading
         let on_file_contents_load: Callback<(String, String)> =
             ctx.link().callback(|(file_name, file_contents)| {
                 ComponentMsg::UpdateSourceText(file_name, file_contents)
             });
+
+        // event fired by TestResults to close modal
+        let on_test_results_modal_closed: Callback<()> =
+            ctx.link().callback(|_| ComponentMsg::ResultsModalToggled);
 
         // timer formatting
         let (minutes, seconds) = self.app_utils.format_time();
 
         html! {
             <main class={classes!(String::from("flex justify-center min-h-screen h-screen bg-base-100 w-full"))}>
+                // results modal
+                if self.app_utils.modal_open {
+                    <crate::results::TestResults { on_test_results_modal_closed } />
+                }
+
+
                 <div class={classes!(String::from("flex flex-col justify-between h-full w-full md:w-[60%]"))}>
-                    <div>/**/</div>
+                    <div>
+                        /*<button onclick={ctx.link().callback(|_| ComponentMsg::ResultsModalToggled)}>{"open modal"}</button>*/
+                    </div>
 
 
                     <div class={classes!(String::from("h-fit"))}>
@@ -291,6 +310,10 @@ impl Component for App {
 
                 // Ensure time doesn't go below zero
                 self.app_utils.duration_seconds = new_seconds.max(0) as u32;
+                true
+            }
+            ComponentMsg::ResultsModalToggled => {
+                self.app_utils.toggle_modal();
                 true
             }
         }

@@ -22,6 +22,9 @@ pub(crate) struct AppUtils {
 
     /// Handle for the interval timer. Kept in state to be dropped when pausing/unmounting.
     pub interval_handle: Option<Interval>,
+
+    /// Handle whether modal is open
+    pub modal_open: bool,
 }
 
 impl Default for AppUtils {
@@ -31,6 +34,7 @@ impl Default for AppUtils {
             duration_seconds: INITIAL_TIME_MINUTES * 60,
             timer_running: false,
             interval_handle: None,
+            modal_open: false,
         }
     }
 }
@@ -51,5 +55,9 @@ impl AppUtils {
 
         // Use pad_start for "05:08" formatting
         (format!("{:02}", minutes), format!("{:02}", seconds))
+    }
+
+    pub(crate) fn toggle_modal(&mut self) {
+        self.modal_open = !self.modal_open;
     }
 }
