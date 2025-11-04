@@ -120,7 +120,11 @@ impl Component for App {
                                 50 => "text-5xl",
                                 _ => ""
                             }
-                        }))} onkeydown={ctx.link().callback(|e: KeyboardEvent| ComponentMsg::IncomingUserInput(e.key()))}>
+                        }))} onkeydown={ctx.link().callback(|e: KeyboardEvent| { 
+                            // prevent browser's back navigation when Backspace is pressed on tabindex=0 elements
+                            e.prevent_default();
+                            ComponentMsg::IncomingUserInput(e.key()) 
+                        })}>
                             {
                                 self.source_text.char_indices().map(|(index, c)| {
                                     let class={
