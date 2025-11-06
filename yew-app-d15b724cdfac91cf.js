@@ -244,20 +244,20 @@ function makeClosure(arg0, arg1, dtor, f) {
     CLOSURE_DTORS.register(real, state, state);
     return real;
 }
-function wasm_bindgen__convert__closures_____invoke__hfcfd46e19eabec41(arg0, arg1, arg2) {
-    wasm.wasm_bindgen__convert__closures_____invoke__hfcfd46e19eabec41(arg0, arg1, arg2);
-}
-
 function wasm_bindgen__convert__closures_____invoke__h57752e6f14dbbab6(arg0, arg1) {
     wasm.wasm_bindgen__convert__closures_____invoke__h57752e6f14dbbab6(arg0, arg1);
 }
 
-function wasm_bindgen__convert__closures________invoke__hd6afe15eb673b49e(arg0, arg1, arg2) {
-    wasm.wasm_bindgen__convert__closures________invoke__hd6afe15eb673b49e(arg0, arg1, arg2);
-}
-
 function wasm_bindgen__convert__closures________invoke__h4a2985ccf124c30f(arg0, arg1, arg2) {
     wasm.wasm_bindgen__convert__closures________invoke__h4a2985ccf124c30f(arg0, arg1, arg2);
+}
+
+function wasm_bindgen__convert__closures_____invoke__hfcfd46e19eabec41(arg0, arg1, arg2) {
+    wasm.wasm_bindgen__convert__closures_____invoke__hfcfd46e19eabec41(arg0, arg1, arg2);
+}
+
+function wasm_bindgen__convert__closures________invoke__hd6afe15eb673b49e(arg0, arg1, arg2) {
+    wasm.wasm_bindgen__convert__closures________invoke__hd6afe15eb673b49e(arg0, arg1, arg2);
 }
 
 const EXPECTED_RESPONSE_TYPES = new Set(['basic', 'cors', 'default']);
